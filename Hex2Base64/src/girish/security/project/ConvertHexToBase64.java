@@ -1,4 +1,7 @@
 /**
+ * @author Girish Raman
+ * From http://cryptopals.com/
+ * 
  * This piece of code converts a Hex encoded String into Base64. 
  * Probably not the best way to do it- I could have very well used a library. 
  * I just wanted to do it this way!
