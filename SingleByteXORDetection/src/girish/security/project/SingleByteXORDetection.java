@@ -2,20 +2,62 @@
  * @author Girish Raman
  * From http://cryptopals.com/
  * 
- * This program takes in a HEX string, that has been XOR'd against a single character. 
- * It finds the key, and decrypts the message.
+ * This program takes in a couple of HEX strings from a file, one of which has been XOR'd against a single character. 
+ * It finds that string.
  */
 
 package girish.security.project;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-public class SingleByteXOR {
+public class SingleByteXORDetection {
 
-	public static void main(String[] a) {
-		String hexCipherText = "06e8f90a3118381c5414157d1434050210363e30500511a00a3d56e10438";
+	public static Map<String, Double> finalFinalScores = new LinkedHashMap<String, Double>();
+
+	public static void main(String[] args) {
+		int i = 0;
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader("4.txt"));
+			String line = br.readLine();
+			while (line != null) {
+				function(line, i);
+				line = br.readLine();
+				i++;
+			}
+			br.close();
+		} catch (Exception e) {
+		}
+
+		// Iterate through the HashMap finalFinalScores and display the
+		// keyCharacter, the
+		// corresponding plainText and its score.
+		Iterator<?> it = finalFinalScores.entrySet().iterator();
+		double maxMaxScore = 0;
+		String cipher_keyCharacter_score = null;
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			cipher_keyCharacter_score = (String) pair.getKey();
+			maxMaxScore = (double) pair.getValue();
+			String[] parts = cipher_keyCharacter_score.split("-");
+			String key = formRepeatingCharacterString(parts[1]);
+			String hexPlainText = computeXOR(parts[0], key);
+			String originalPlainText = computeHexToASCII(hexPlainText);
+			System.out.println(parts[1] + " " + maxMaxScore + "\n" + originalPlainText + "\n\n");
+		}
+		it.remove();
+	}
+
+	public static void function(String hexCipherText, int index) {
+
 		Map<String, Double> finalScores = new LinkedHashMap<String, Double>();
 
 		// For each character A-Z, XOR the cipher with an equal length repeating
@@ -37,25 +79,16 @@ public class SingleByteXOR {
 			finalScores.put(String.valueOf((char) i), computeScore(output));
 		}
 
-		/*
-		//Iterate through the HashMap and display the keyCharacter, the corresponding plainText and its score.
-		Iterator<?> it = finalScores.entrySet().iterator();
-		double score = 0;
-		String keyCharacter = null;
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			score = (double) pair.getValue();
-			
-			keyCharacter = (String) pair.getKey();
-			String key = formRepeatingCharacterString(keyCharacter);
+		// Do the same for 0-9.
+		for (int i = 0x30; i <= 0x39; ++i) {
+			String key = formRepeatingCharacterString(i);
 			String hexPlainText = computeXOR(hexCipherText, key);
 			String output = computeHexToASCII(hexPlainText);
+			finalScores.put(String.valueOf((char) i), computeScore(output));
+		}
 
-			System.out.println(keyCharacter + "\n" + score + "\n" + output + "\n\n");
-			it.remove();
-		}*/
-		
-		//Iterate through the HashMap and display the keyCharacter, the corresponding plainText and its score.
+		// Iterate through the HashMap and display the keyCharacter, the
+		// corresponding plainText and its score.
 		Iterator<?> it = finalScores.entrySet().iterator();
 		double maxScore = 0;
 		String keyCharacter = null;
@@ -64,17 +97,14 @@ public class SingleByteXOR {
 			maxScore = (maxScore > (double) pair.getValue() ? maxScore : (double) pair.getValue());
 			keyCharacter = (maxScore > (double) pair.getValue() ? keyCharacter : (String) pair.getKey());
 		}
-		String key = formRepeatingCharacterString(keyCharacter);
-		String hexPlainText = computeXOR(hexCipherText, key);
-		String originalPlainText = computeHexToASCII(hexPlainText);
-
-		System.out.println(keyCharacter + "\n" + maxScore + "\n" + originalPlainText + "\n\n");
+		finalFinalScores = sortHashMapByValuesD((HashMap<String, Double>) finalFinalScores);
+		finalFinalScores.put(hexCipherText + "-" + keyCharacter, maxScore);
 		it.remove();
-	
 	}
-	
+
 	/*
-	 * Given a HEX character, this function forms a String by repeating it 30 times.
+	 * Given a HEX character, this function forms a String by repeating it 30
+	 * times.
 	 */
 	static String formRepeatingCharacterString(int i) {
 		String key = "";
@@ -83,7 +113,7 @@ public class SingleByteXOR {
 		}
 		return key;
 	}
-	
+
 	static String formRepeatingCharacterString(String keyCharacter) {
 		String key = "";
 		for (int j = 0; j < 30; ++j) {
@@ -95,7 +125,7 @@ public class SingleByteXOR {
 	/*
 	 * This function computes the ASCII equivalent of a HEX String.
 	 */
-	static String computeHexToASCII(String hexPlainText){
+	static String computeHexToASCII(String hexPlainText) {
 		StringBuilder output = new StringBuilder();
 		for (int k = 0; k < hexPlainText.length(); k += 2) {
 			String str = hexPlainText.substring(k, k + 2);
@@ -163,4 +193,37 @@ public class SingleByteXOR {
 		}
 		return score;
 	}
+
+	/*
+	 * This function sorts the given HashMap with the key.
+	 */
+	public static LinkedHashMap<String, Double> sortHashMapByValuesD(HashMap<String, Double> passedMap) {
+		List<String> mapKeys = new ArrayList<String>(passedMap.keySet());
+		List<Double> mapValues = new ArrayList<Double>(passedMap.values());
+		Collections.sort(mapValues);
+		Collections.sort(mapKeys);
+
+		LinkedHashMap<String, Double> sortedMap = new LinkedHashMap<String, Double>();
+
+		Iterator<Double> valueIt = mapValues.iterator();
+		while (valueIt.hasNext()) {
+			Object val = valueIt.next();
+			Iterator<String> keyIt = mapKeys.iterator();
+
+			while (keyIt.hasNext()) {
+				Object key = keyIt.next();
+				String comp1 = passedMap.get(key).toString();
+				String comp2 = val.toString();
+
+				if (comp1.equals(comp2)) {
+					passedMap.remove(key);
+					mapKeys.remove(key);
+					sortedMap.put((String) key, (Double) val);
+					break;
+				}
+			}
+		}
+		return sortedMap;
+	}
+
 }
