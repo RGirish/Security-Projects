@@ -3,7 +3,7 @@ package girish.security.project;
 public class RepeatingKeyXOR {
 
 	public static void main(String[] args) {
-		String plainText = "Burning 'em, if you ain't quick and nimble";
+		String plainText = "Burning 'em, if you ain't quick and nimble\n\nI go crazy when I hear a cymbal";
 		System.out.println(encrypt(plainText, "ICE"));
 	}
 
@@ -11,10 +11,10 @@ public class RepeatingKeyXOR {
 		String hexPlainText = asciiToHex(asciiPlainText);
 		String repeatedAsciiKey = generateRepeatedKey(asciiSeed, asciiPlainText.length());
 		String repeatedHexKey = asciiToHex(repeatedAsciiKey);
-		System.out.println(asciiPlainText);
-		System.out.println(hexPlainText);
-		System.out.println(repeatedAsciiKey);
-		System.out.println(repeatedHexKey);
+		//System.out.println(asciiPlainText);
+		//System.out.println(hexPlainText);
+		//System.out.println(repeatedAsciiKey);
+		//System.out.println(repeatedHexKey);
 		return computeXOR(hexPlainText, repeatedHexKey);
 	}
 
