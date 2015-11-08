@@ -26,7 +26,7 @@ import java.util.Set;
 public class BreakRepeatingKeyXOR {
 
 	static String hexLookUp = "0123456789abcdef",
-			base64LookUp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";;
+			base64LookUp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	public static void main(String[] args) {
 		convertBase64FileToHex();
@@ -39,32 +39,15 @@ public class BreakRepeatingKeyXOR {
 
 	static String computeSingleByteXOR(String hexCipherText) {
 		Map<String, Double> finalScores = new LinkedHashMap<String, Double>();
-
-		// For each character A-Z, XOR the cipher with an equal length repeating
-		// character string.
+		// For each ascii printable character from hex ascii 20 to 75, XOR the
+		// cipher with an equal length repeating character string.
 		// Convert the XOR output to ASCII, and send the ASCII string to
 		// computeScore to (surprise!) compute its score.
-		for (int i = 0x41; i <= 0x5a; ++i) {
+		for (int i = 0x20; i <= 0x7F; ++i) {
 			String key = formRepeatingCharacterString(i, hexCipherText.length());
 			String hexPlainText = computeXOR(hexCipherText, key);
 			String output = computeHexToASCII(hexPlainText);
 			finalScores.put(String.valueOf((char) i), computeScore(output.toString()));
-		}
-
-		// Do the same for a-z.
-		for (int i = 0x61; i <= 0x7a; ++i) {
-			String key = formRepeatingCharacterString(i, hexCipherText.length());
-			String hexPlainText = computeXOR(hexCipherText, key);
-			String output = computeHexToASCII(hexPlainText);
-			finalScores.put(String.valueOf((char) i), computeScore(output));
-		}
-
-		// Do the same for 0-9.
-		for (int i = 0x30; i <= 0x39; ++i) {
-			String key = formRepeatingCharacterString(i, hexCipherText.length());
-			String hexPlainText = computeXOR(hexCipherText, key);
-			String output = computeHexToASCII(hexPlainText);
-			finalScores.put(String.valueOf((char) i), computeScore(output));
 		}
 
 		// Iterate through the HashMap and display the keyCharacter, the
@@ -116,7 +99,6 @@ public class BreakRepeatingKeyXOR {
 			try {
 				fileInputStream.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			// System.out.println(s);
@@ -283,7 +265,7 @@ public class BreakRepeatingKeyXOR {
 
 	/**
 	 * This function computes character by character XOR for the two input HEX
-	 * strings returns an output string in Binary.
+	 * strings returns an output string in HEX.
 	 */
 	static String computeXOR(String first, String second) {
 		String result = "";
@@ -293,7 +275,7 @@ public class BreakRepeatingKeyXOR {
 		for (int i = 0; i < first.length(); ++i) {
 			int cc = Integer.parseInt(String.valueOf(first.charAt(i)), 16)
 					^ Integer.parseInt(String.valueOf(second.charAt(i)), 16);
-			stringBuilder.append(Integer.toBinaryString(cc));
+			stringBuilder.append(String.valueOf(Integer.toHexString(cc)));
 		}
 		result = stringBuilder.toString();
 		return result;
@@ -305,7 +287,7 @@ public class BreakRepeatingKeyXOR {
 	 */
 	static String formRepeatingCharacterString(int i, int num) {
 		String key = "";
-		for (int j = 0; j < num; ++j) {
+		for (int j = 0; j < num / 2; ++j) {
 			key = key + Integer.toHexString(i);
 		}
 		return key;

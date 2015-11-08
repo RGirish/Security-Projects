@@ -104,7 +104,7 @@ public class SingleByteXOR {
 		return output.toString();
 	}
 
-	/*
+	/**
 	 * This function computes character by character XOR for the two input HEX
 	 * strings returns an output string in HEX.
 	 */

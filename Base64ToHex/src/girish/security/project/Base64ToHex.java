@@ -12,7 +12,6 @@ public class Base64ToHex {
 
 		// Input Base64 String
 		String base64 = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
-		System.out.println(base64.length());
 		for (int i = 0; i < base64.length(); ++i) {
 			// Take first 6 bits (from the first base64 digit) and call
 			// convert() with the first 4 bits.

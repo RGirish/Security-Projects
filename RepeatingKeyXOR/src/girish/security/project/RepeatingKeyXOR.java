@@ -11,10 +11,6 @@ public class RepeatingKeyXOR {
 		String hexPlainText = asciiToHex(asciiPlainText);
 		String repeatedAsciiKey = generateRepeatedKey(asciiSeed, asciiPlainText.length());
 		String repeatedHexKey = asciiToHex(repeatedAsciiKey);
-		//System.out.println(asciiPlainText);
-		//System.out.println(hexPlainText);
-		//System.out.println(repeatedAsciiKey);
-		//System.out.println(repeatedHexKey);
 		return computeXOR(hexPlainText, repeatedHexKey);
 	}
 
