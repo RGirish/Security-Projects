@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,19 +30,55 @@ public class AESinECB {
 		String outFilename = "7hex.txt";
 		File outFile = new File(outFilename);
 		try {
-			outFile.createNewFile();
+
+			/******************************************************/
+
+			/*
+			 * FIO01-J. Create files with appropriate access permissions
+			 * 
+			 * @reference
+			 * https://www.securecoding.cert.org/confluence/display/java/FIO01-J
+			 * .+Create+files+with+appropriate+access+permissions
+			 */
+
+			// Throw a warning message if file already exists and try to delete
+			// it, rather than overwrite it.
+			// No need to check if it is a directory, as we're going to delete
+			// and recreate it anyway!
+			if (outFile.exists()) {
+				System.out.println("File already exists. Trying to delete it now...");
+				boolean result = outFile.delete();
+				if (!result) {
+					System.out.println("Already existing file/directory with name '" + outFilename
+							+ "' not deleted successfully!");
+					return;
+				} else {
+					System.out.println("Deleted successfully!");
+				}
+			}
+			@SuppressWarnings("unused")
+			boolean result = outFile.createNewFile();
+			// no need to check result which will be false only if the file
+			// already exists which is already checked before!
+			outFile.setReadable(true, true);
+			outFile.setWritable(true, true);
+			// For java versions <1.7, use this -
+			// Runtime.getRuntime().exec("attrib -r " + outFilename);
+
+			/******************************************************/
+
 			FileReader fr = new FileReader(inFilename);
 			BufferedReader br = new BufferedReader(fr);
-			FileWriter fileWriter = new FileWriter(outFile);
+			FileWriter writer = new FileWriter(outFile);
 			String s;
 
 			// Read each line of the file as a String and pass it to the
 			// function convertBase64ToHex() to get back the decoded String
 			while ((s = br.readLine()) != null) {
 				s = convertBase64ToHex(s);
-				fileWriter.write(s);
+				writer.write(s);
 			}
-			fileWriter.close();
+			writer.close();
 			br.close();
 			fr.close();
 		} catch (IOException e) {
