@@ -1,0 +1,32 @@
+package DH;
+
+import java.util.Random;
+
+public class diffi_hellman {
+	public static void main(String[] args)
+	{
+		int p = 47 , g = 3;
+		int x , y , X ,Y , K1 , K2;
+		Random r1 = new Random();
+		x = r1.nextInt(10000)+1;
+		System.out.println("\n x = "+x);
+		X = (int) ((Math.pow(g, x))%p);
+		System.out.println("\nX = "+X);
+		y = r1.nextInt(10000)+1;
+		System.out.println("\n y = "+y);
+		Y = (int) ((Math.pow(g, y))%p);
+		System.out.println("\n Y = "+Y);
+		K1 = (int) ((Math.pow(Y, x))%p) ;
+		System.out.println("\n"+K1);
+		K2 = (int) ((Math.pow(X, y))%p) ;
+		System.out.println("\n"+K2);
+		/*https://www.securecoding.cert.org/confluence/display/java/EXP51-J.+Do+not+perform+assignments+in+conditional+expressions
+		  */
+		if(K1==K2)
+			System.out.println("\nKeys are same");
+		else
+			System.out.println("\nWrong");
+		
+	}
+
+}

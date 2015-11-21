@@ -1,0 +1,15 @@
+package padding;
+
+public class PKCS {
+	public static void main(String[] args){
+		StringBuilder s = new StringBuilder("YELLOW SUBMARINE");
+		int bytes=4;
+		String s1=String.format("0x%02X", bytes);
+		for(int i=0;i<bytes;i++)
+		{
+			s.append(s1);
+		}
+			System.out.println(s);
+	}
+
+}

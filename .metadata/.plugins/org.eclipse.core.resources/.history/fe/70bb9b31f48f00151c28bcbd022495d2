@@ -1,0 +1,99 @@
+package DH;
+
+import java.net.*;
+import java.io.*;
+
+public class diff_hellman_server {
+	ServerSocket ss; 
+	Socket cli; 
+	DataInputStream ky=new DataInputStream(System.in); 
+	public diff_hellman_server() 
+	{ 
+	try 
+	{ 
+	ss=new ServerSocket(2013); 
+	System.out.println(" USER A"); 
+	cli=ss.accept(); 
+	} 
+	catch(Exception e) 
+	{ 
+	System.out.println(e.getMessage()); 
+	} 
+	} 
+	public void here()throws Exception 
+	{ 
+	int flag=1; 
+	int q=0,al,xa=9999,ya,yb,key; 
+	DataOutputStream dsend=new DataOutputStream(cli.getOutputStream()); 
+	DataInputStream din=new DataInputStream(cli.getInputStream()); 
+	System.out.print("Enter q: "); 
+	while(flag==1) 
+	{ 
+	q=Integer.parseInt(ky.readLine()); 
+	flag=check_prime(q); 
+	} 
+	dsend.writeUTF(String.valueOf(q)); 
+	System.out.print("Enter alpha: "); 
+	al=Integer.parseInt(ky.readLine()); 
+	dsend.writeUTF(String.valueOf(al)); 
+	while(xa>q) 
+	{ 
+	System.out.print("Enter xa: "); 
+	xa=Integer.parseInt(ky.readLine()); 
+	} 
+	ya=comp(al,xa,q); 
+	dsend.writeUTF(String.valueOf(ya)); 
+	yb=Integer.parseInt(din.readUTF()); 
+	key=comp(yb,xa,q); 
+	System.out.println("User A has following information: "); 
+	System.out.println("Xa= "+xa+" Ya: "+ya+" Yb: "+yb); 
+	System.out.println("Key generated at A is "+key); 
+	} 
+	public int check_prime(int n) 
+	{ 
+	int m,k=0,a,b,p; 
+	int i,rem=0,t; 
+	t=n-1; 
+	while(rem!=1) 
+	{ 
+	t=t/2; 
+	k++; 
+	rem=t%2; 
+	} 
+	m=t; 
+	a=2; 
+	b=comp(a,m,n); 
+	if((b%n)==1) 
+	{ 
+	return 0; 
+	} 
+	for(i=0;i<k;i++) 
+	{ 
+	if((b%n)==(n-1)) 
+	{ 
+	return 0; 
+	} 
+	else 
+	{ 
+	b=(b*b)%n; 
+	} 
+	} 
+	return 1; 
+	} 
+	public int comp(int m,int e,int n) 
+	{ 
+	int i,val=1; 
+	for(i=1;i<=e;i++) 
+	val=(val*m)%n; 
+	} 
+	return val; 
+	} 
+	public static void main(String[] args)throws Exception 
+	{ 
+	diff_hellman_server obj=new diff_hellman_server(); 
+	obj.here(); 
+	} 
+}
+
+
+
