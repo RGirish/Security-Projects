@@ -15,9 +15,27 @@ import javax.xml.bind.DatatypeConverter;
 public class ECBCBCDetection {
 
 	public static void main(String[] args) {
-		encryptionOracle("Girish", generateRandomAESKey());
+		String cipherText = encryptionOracle("Hey this is GiriHey this is GiriHey this is Giri",
+				generateRandomAESKey());
+		if (cipherText != null) {
+			if (cipherText.substring(16, 32).equals(cipherText.substring(32, 48))) {
+				System.out.println("*** Outside Black Box ***");
+				System.out.println("It has been detected as the ECB Mode.");
+			} else {
+				System.out.println("*** Outside Black Box ***");
+				System.out.println("It has been detected as the CBC Mode.");
+			}
+		}
 	}
 
+	/**
+	 * 
+	 * @param hexString
+	 *            The input String to be padded
+	 * @param blockSize
+	 *            The size of each block
+	 * @return The input string padded with characters according to PKCS #7
+	 */
 	private static String PKCSPadTheHexString(String hexString, int blockSize) {
 		StringBuilder s = new StringBuilder(hexString);
 		/*
@@ -31,10 +49,22 @@ public class ECBCBCDetection {
 		if (s.length() % 32 == 0) {
 			// No Padding
 		} else {
-			int diff = ((blockSize * 2) - (s.length() % 32)) / 2;
-			for (int i = 0; i < diff; i++) {
-				s.append("0");
-				s.append(Integer.toHexString((diff)));
+			/*
+			 * NUM00-J. Detect or prevent integer overflow
+			 * 
+			 * @reference
+			 * https://securecoding.cert.org/confluence/display/java/NUM00-J.+
+			 * Detect+or+prevent+integer+overflow
+			 */
+			try {
+				int diff = safeDivide(safeSubtract(safeMultiply(blockSize, 2), (s.length() % 32)), 2);
+				for (int i = 0; i < diff; i++) {
+					s.append("0");
+					s.append(Integer.toHexString((diff)));
+				}
+			} catch (ArithmeticException e) {
+				System.out.println("ArithmeticException thrown by safeArithmetic function - " + e.getMessage());
+				return null;
 			}
 		}
 		return s.toString();
@@ -50,7 +80,7 @@ public class ECBCBCDetection {
 		return builder.toString();
 	}
 
-	public static void encryptionOracle(String plainText, String key) {
+	public static String encryptionOracle(String plainText, String key) {
 		/*
 		 * MET00-J. Validate method arguments
 		 * 
@@ -60,30 +90,35 @@ public class ECBCBCDetection {
 		 */
 		if (plainText == null) {
 			System.out.println("Plain Text cannot be NULL.");
-			return;
+			return null;
 		}
 		if (key == null) {
 			System.out.println("Key cannot be NULL.");
-			return;
+			return null;
 		}
 		if (key.length() != 16) {
 			System.out.println("Key should be 16 Bytes (hex characters) long.");
-			return;
+			return null;
 		}
-		System.out.println("Hex Plain Text : " + asciiToHex(plainText));
-		System.out.println("Hex Key is : " + asciiToHex(key));
 		plainText = appendRandomPrefixAndSuffixToPlainText(asciiToHex(plainText));
-		System.out.println("PT after random padding is : " + plainText);
-		System.out.println("PT after PKCS padding is : " + PKCSPadTheHexString(plainText, 16));
-//		System.exit(0);
 		SecureRandom rand = new SecureRandom();
 		int bit = rand.nextInt(2);
 		if (bit == 0) {
-			System.out.println("***Encrypting in ECB Mode***");
-			System.out.println(encryptAESECB(PKCSPadTheHexString(plainText, 16), asciiToHex(key)));
+			System.out.println("*** Inside Black Box ***");
+			System.out.println("Encrypting in ECB Mode.\n");
+			String pkcsPaddedHexPlainText = PKCSPadTheHexString(plainText, 16);
+			if (pkcsPaddedHexPlainText == null) {
+				return null;
+			}
+			return encryptAESECB(pkcsPaddedHexPlainText, asciiToHex(key));
 		} else {
-			System.out.println("***Encrypting in CBC Mode***");
-			System.out.println(encryptAESCBC(PKCSPadTheHexString(plainText, 16), asciiToHex(key)));
+			System.out.println("*** Inside Black Box ***");
+			System.out.println("Encrypting in CBC Mode.\n");
+			String pkcsPaddedHexPlainText = PKCSPadTheHexString(plainText, 16);
+			if (pkcsPaddedHexPlainText == null) {
+				return null;
+			}
+			return encryptAESCBC(pkcsPaddedHexPlainText, asciiToHex(key));
 		}
 
 	}
@@ -195,4 +230,50 @@ public class ECBCBCDetection {
 		}
 		return new String(result);
 	}
+
+	/*
+	 * @reference
+	 * https://securecoding.cert.org/confluence/display/java/NUM00-J.+Detect+or+
+	 * prevent+integer+overflow
+	 * 
+	 * The following are functions that perform the basic arithmetic operations
+	 * of subtraction, multiplication and division according to the secure
+	 * coding standards - by avoiding the Integer Overflow Exception.
+	 */
+
+	static final int safeSubtract(int left, int right) throws ArithmeticException {
+		if (right > 0 ? left < Integer.MIN_VALUE + right : left > Integer.MAX_VALUE + right) {
+			throw new ArithmeticException("Integer overflow");
+		}
+		return left - right;
+	}
+
+	static final int safeMultiply(int left, int right) throws ArithmeticException {
+		if (right > 0 ? left > Integer.MAX_VALUE / right || left < Integer.MIN_VALUE / right
+				: (right < -1 ? left > Integer.MIN_VALUE / right || left < Integer.MAX_VALUE / right
+						: right == -1 && left == Integer.MIN_VALUE)) {
+			throw new ArithmeticException("Integer overflow");
+		}
+		return left * right;
+	}
+
+	static final int safeDivide(int left, int right) throws ArithmeticException {
+		if ((left == Integer.MIN_VALUE) && (right == -1)) {
+			throw new ArithmeticException("Integer overflow");
+		}
+		/*
+		 * NUM02-J. Ensure that division and remainder operations do not result
+		 * in divide-by-zero errors
+		 * 
+		 * @reference
+		 * https://securecoding.cert.org/confluence/display/java/NUM02-J.+Ensure
+		 * +that+division+and+remainder+operations+do+not+result+in+divide-by-
+		 * zero+errors
+		 */
+		if (right == 0) {
+			throw new ArithmeticException("Divide By Zero");
+		}
+		return left / right;
+	}
+
 }
