@@ -161,10 +161,12 @@ public class BreakRepeatingKeyXOR {
 
 		try {
 			outFile.createNewFile();
-			/*
-			 * if (!isInSecureDir(path)) { System.out.println(
-			 * "File not in secure directory"); return; }
-			 */
+
+			if (!isInSecureDir(inPath)) {
+				System.out.println("File not in secure directory");
+				return;
+			}
+
 			BasicFileAttributes inAttr = Files.readAttributes(inPath, BasicFileAttributes.class,
 					LinkOption.NOFOLLOW_LINKS);
 			BasicFileAttributes outAttr = Files.readAttributes(outPath, BasicFileAttributes.class,
@@ -253,7 +255,7 @@ public class BreakRepeatingKeyXOR {
 	}
 
 	/**
-	 * This function computes the ASCII equivalent of a HEX String.
+	 * This function computes the Hex equivalent of an ASCII String.
 	 */
 	public static String asciiToHex(String ascii) {
 		StringBuffer buffer = new StringBuffer();
@@ -376,7 +378,16 @@ public class BreakRepeatingKeyXOR {
 	 *            Path to test
 	 * @return true if file's directory is secure.
 	 */
-	public static boolean isInSecureDir(Path file) {
+	private final static boolean isInSecureDir(Path file) {
+		/*
+		 * MET03-J. Methods that perform a security check must be declared
+		 * private or final
+		 * 
+		 * @reference
+		 * https://securecoding.cert.org/confluence/display/java/MET03-J.+
+		 * Methods+that+perform+a+security+check+must+be+declared+private+or+
+		 * final
+		 */
 		return isInSecureDir(file, null);
 	}
 
@@ -391,7 +402,16 @@ public class BreakRepeatingKeyXOR {
 	 *            User to test. If null, defaults to current user
 	 * @return true if file's directory is secure.
 	 */
-	public static boolean isInSecureDir(Path file, UserPrincipal user) {
+	private final static boolean isInSecureDir(Path file, UserPrincipal user) {
+		/*
+		 * MET03-J. Methods that perform a security check must be declared
+		 * private or final
+		 * 
+		 * @reference
+		 * https://securecoding.cert.org/confluence/display/java/MET03-J.+
+		 * Methods+that+perform+a+security+check+must+be+declared+private+or+
+		 * final
+		 */
 		return isInSecureDir(file, user, 5);
 	}
 
@@ -408,7 +428,16 @@ public class BreakRepeatingKeyXOR {
 	 *            Number of symbolic links allowed
 	 * @return true if file's directory is secure.
 	 */
-	public static boolean isInSecureDir(Path file, UserPrincipal user, int symlinkDepth) {
+	private final static boolean isInSecureDir(Path file, UserPrincipal user, int symlinkDepth) {
+		/*
+		 * MET03-J. Methods that perform a security check must be declared
+		 * private or final
+		 * 
+		 * @reference
+		 * https://securecoding.cert.org/confluence/display/java/MET03-J.+
+		 * Methods+that+perform+a+security+check+must+be+declared+private+or+
+		 * final
+		 */
 		if (!file.isAbsolute()) {
 			file = file.toAbsolutePath();
 		}
