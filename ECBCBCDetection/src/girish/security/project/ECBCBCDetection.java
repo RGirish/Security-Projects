@@ -70,6 +70,10 @@ public class ECBCBCDetection {
 		return s.toString();
 	}
 
+	/**
+	 * This function randomly generates a 16 Byte key to be used with AES
+	 * @return The randomly generated key
+	 */
 	public static String generateRandomAESKey() {
 		String keyCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 		SecureRandom rand = new SecureRandom();
