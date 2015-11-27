@@ -14,8 +14,8 @@ public class rsa {
 		double i;
 		double p,q,n,et,e,d=1;
 		double m,c=1;
-		p = 7;//prime no 1
-		q = 13;//prime no 2
+		p = 23;//prime no 1
+		q = 29;//prime no 2
 		n = p*q;//product of primes
 		et = (p-1) * (q-1);
 		/* @reference https://www.securecoding.cert.org/confluence/display/java/
