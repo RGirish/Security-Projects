@@ -1,6 +1,12 @@
 package mitm_attack;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Random;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class mitm {
 	/* @reference https://www.securecoding.cert.org/confluence/display/java/
@@ -10,7 +16,7 @@ public class mitm {
 		int c=a%b;
 		return (c<0)? -c : c;
 	}
-	public static void main(String[] args){
+	public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException{
 		
 		int p = 47 , g = 3;
 		int x , y , X ,Y , K1 , K2;
@@ -23,11 +29,12 @@ public class mitm {
 		System.out.println("\n y = "+y);
 		Y = mod(((int) (Math.pow(g, y))),p);
 		System.out.println("\n Y = "+Y);
-		K1 = mod(((int) (Math.pow(Y, x))),p) ;
+		//M sends p instead of Y
+		K1 = mod(((int) (Math.pow(p, x))),p) ;
 		System.out.println("\n"+K1);
-		K2 = mod(((int) (Math.pow(X, y))),p) ;
+		//M sends p instead of X
+		K2 = mod(((int) (Math.pow(p, y))),p) ;
 		System.out.println("\n"+K2);
-		
 	}
 
 }
