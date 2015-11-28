@@ -17,8 +17,9 @@ public class AESinECB {
 			base64LookUp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	public static void main(String[] args) {
-		convertBase64FileToHex();
-		System.out.println(decryptAES());
+		//convertBase64FileToHex();
+		//System.out.println(decryptAES());
+		System.out.println(hexToAscii("436f6d696e67207769746820766976696420666163657300"));
 	}
 
 	/**
@@ -140,6 +141,17 @@ public class AESinECB {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < ascii.length(); ++i) {
 			buffer.append(Integer.toHexString((int) ascii.charAt(i)));
+		}
+		return buffer.toString();
+	}
+
+	public static String hexToAscii(String hex) {
+		StringBuffer buffer = new StringBuffer();
+		for (int i = 0; i + 1 < hex.length(); ++i) {
+			String s = "" + hex.charAt(i);
+			i++;
+			s = s + hex.charAt(i);
+			buffer.append((char) Integer.parseInt(s, 16));
 		}
 		return buffer.toString();
 	}
