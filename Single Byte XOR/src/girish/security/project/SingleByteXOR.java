@@ -15,7 +15,9 @@ import java.util.Map;
 public class SingleByteXOR {
 
 	public static void main(String[] a) {
-		String hexCipherText = "06e8f90a3118381c5414157d1434050210363e30500511a00a3d56e10438";
+
+		String hexCipherText = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a";
+		//104111023000111105000440016417173110430041040051160000135430015400340000400140444400250305110003110515020112041016013340010031625140011644441124670450000340001514544404001204344510003010101401414400014433343101030041354414052411125021511404310011110514440002250304516403110115400044004012413050502130001011010144010025021413004204111440503565111040305110063014134041000040053713045103030011510044074514034070001004300411104104065001660306210417440101013004400112403341141424110314450120400125034050014341411510500404011640214010032040151000004154116032001140130015114210040416
 		Map<String, Double> finalScores = new LinkedHashMap<String, Double>();
 
 		// For each character A-Z, XOR the cipher with an equal length repeating
@@ -37,23 +39,6 @@ public class SingleByteXOR {
 			finalScores.put(String.valueOf((char) i), computeScore(output));
 		}
 
-		/*
-		//Iterate through the HashMap and display the keyCharacter, the corresponding plainText and its score.
-		Iterator<?> it = finalScores.entrySet().iterator();
-		double score = 0;
-		String keyCharacter = null;
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			score = (double) pair.getValue();
-			
-			keyCharacter = (String) pair.getKey();
-			String key = formRepeatingCharacterString(keyCharacter);
-			String hexPlainText = computeXOR(hexCipherText, key);
-			String output = computeHexToASCII(hexPlainText);
-
-			System.out.println(keyCharacter + "\n" + score + "\n" + output + "\n\n");
-			it.remove();
-		}*/
 		
 		//Iterate through the HashMap and display the keyCharacter, the corresponding plainText and its score.
 		Iterator<?> it = finalScores.entrySet().iterator();
