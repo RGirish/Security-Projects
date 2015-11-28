@@ -11,7 +11,7 @@ public class Base64ToHex {
 	public static void main(String[] a) {
 
 		// Input Base64 String
-		String base64 = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
+		String base64 = "Q29taW5nIHdpdGggdml2aWQgZmFjZXM";
 		for (int i = 0; i < base64.length(); ++i) {
 			// Take first 6 bits (from the first base64 digit) and call
 			// convert() with the first 4 bits.
@@ -21,8 +21,14 @@ public class Base64ToHex {
 
 			// Take the remaining 2 bits (from the first base64 digit) and the
 			// first 2 bits of the second base64 digit and call convert()
-			String secondDigit = String.format("%06d",
-					Integer.parseInt(Integer.toBinaryString(base64LookUp.indexOf(base64.charAt(i)))));
+			String secondDigit = "";
+			try {
+				secondDigit = String.format("%06d",
+						Integer.parseInt(Integer.toBinaryString(base64LookUp.indexOf(base64.charAt(i)))));
+			} catch (StringIndexOutOfBoundsException e) {
+				secondDigit = "000000";
+			}
+
 			convert(firstDigit.substring(4, 6) + secondDigit.substring(0, 2));
 
 			convert(secondDigit.substring(2, 6));
