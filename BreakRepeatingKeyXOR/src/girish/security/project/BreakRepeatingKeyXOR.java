@@ -3,6 +3,7 @@ package girish.security.project;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -17,10 +18,12 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
 import java.nio.file.attribute.UserPrincipalLookupService;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 public class BreakRepeatingKeyXOR {
@@ -29,25 +32,52 @@ public class BreakRepeatingKeyXOR {
 			base64LookUp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	public static void main(String[] args) {
+
 		convertBase64FileToHex();
-		int probableKeyLength = findProbableKeyLength();
-		List<String> blocks = breakCipherIntoBlocks(probableKeyLength);
-		for (String s : blocks) {
-			System.out.println(computeSingleByteXOR(s));
+		// int probableKeyLength = findProbableKeyLength();
+
+		double probableKeyLength = kasiski(readFileByLine("6hex.txt"), 5, 41);
+		System.out.println("Probable Key Length - " + probableKeyLength);
+
+		for (int keySize = 2; keySize < 41; ++keySize) {
+			System.out.println("\n\n\n************" + keySize + "************\n\n\n");
+			List<String> blocks = breakCipherIntoBlocks(keySize);
+			List<String> transposedBlocks = transposeBlocks(blocks);
+			for (String s : transposedBlocks) {
+				computeSingleByteXOR(s);
+			}
+		}
+
+		List<String> afterFindingKey = new ArrayList<>();
+		List<String> blocks = breakCipherIntoBlocks(29);
+		List<String> transposedBlocks = transposeBlocks(blocks);
+		for (String s : transposedBlocks) {
+			String st = computeSingleByteXOR(s);
+			afterFindingKey.add(st);
+		}
+		System.out.println("\n\n*************\n\n");
+
+		int index = 0;
+		while (true) {
+			for (String singleByteCipher : afterFindingKey) {
+				try {
+					System.out.print(singleByteCipher.charAt(index));
+				} catch (Exception e) {
+					return;
+				}
+			}
+			index++;
 		}
 	}
 
-	static String computeSingleByteXOR(String hexCipherText) {
+	public static String computeSingleByteXOR(String hexCipherText) {
 		Map<String, Double> finalScores = new LinkedHashMap<String, Double>();
-		// For each ascii printable character from hex ascii 20 to 75, XOR the
-		// cipher with an equal length repeating character string.
-		// Convert the XOR output to ASCII, and send the ASCII string to
-		// computeScore to (surprise!) compute its score.
-		for (int i = 0x20; i <= 0x7F; ++i) {
+
+		for (int i = 0x20; i <= 0xff; ++i) {
 			String key = formRepeatingCharacterString(i, hexCipherText.length());
 			String hexPlainText = computeXOR(hexCipherText, key);
 			String output = computeHexToASCII(hexPlainText);
-			finalScores.put(String.valueOf((char) i), computeScore(output.toString()));
+			finalScores.put(String.valueOf((char) i), computeScore(output));
 		}
 
 		// Iterate through the HashMap and display the keyCharacter, the
@@ -60,11 +90,27 @@ public class BreakRepeatingKeyXOR {
 			maxScore = (maxScore > (double) pair.getValue() ? maxScore : (double) pair.getValue());
 			keyCharacter = (maxScore > (double) pair.getValue() ? keyCharacter : (String) pair.getKey());
 		}
+		System.out.print(keyCharacter);
 		String key = formRepeatingCharacterString(keyCharacter, hexCipherText.length());
 		String hexPlainText = computeXOR(hexCipherText, key);
 		String originalPlainText = computeHexToASCII(hexPlainText);
 		it.remove();
 		return originalPlainText;
+	}
+
+	private static List<String> transposeBlocks(List<String> blocks) {
+		List<String> transposedBlocks = new ArrayList<String>();
+		for (int i = 0; i < blocks.get(0).length(); i = i + 2) {
+			StringBuilder builder = new StringBuilder();
+			for (String s : blocks) {
+				try {
+					builder.append(s.substring(i, i + 2));
+				} catch (Exception e) {
+				}
+			}
+			transposedBlocks.add(builder.toString());
+		}
+		return transposedBlocks;
 	}
 
 	private static List<String> breakCipherIntoBlocks(int probableKeyLength) {
@@ -79,34 +125,133 @@ public class BreakRepeatingKeyXOR {
 
 		List<String> blocks = new ArrayList<String>();
 		String s = "";
-		for (int i = 0; i < probableKeyLength; ++i) {
-			try {
-				fileInputStream = new FileInputStream(file);
-				for (int j = 0; j < i; ++j) {
-					fileInputStream.read(fileContent);
-					// System.out.println("skiped " + new String(fileContent));
+		int count = 0;
+		try {
+			fileInputStream = new FileInputStream(file);
+			while (fileInputStream.read(fileContent) >= 0) {
+				s = s + new String(fileContent);
+				count++;
+				if (count == 2 * probableKeyLength) {
+					blocks.add(s);
+					s = "";
+					count = 0;
 				}
-				while (fileInputStream.read(fileContent) >= 0) {
-					String ch = new String(fileContent);
-					s = s + ch;
-					for (int c = 0; c < probableKeyLength - 1; ++c) {
-						fileInputStream.read(fileContent);
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("IOException " + e.getMessage());
 			}
-			try {
-				fileInputStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			// System.out.println(s);
+		} catch (Exception e) {
+
+		}
+		if (!s.equals("")) {
 			blocks.add(s);
-			s = "";
 		}
 		return blocks;
 	}
+
+	/**
+	 * @reference https://github.com/lastplacer/VigenereTool/blob/master/
+	 *            vigenere/src/com/nikkocampbell/vigenere/Vigenere.java
+	 ***********************************************/
+
+	public static String readFileByLine(String fileName) {
+		try {
+			File file = new File(fileName);
+			Scanner scanner = new Scanner(file);
+			return scanner.nextLine();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+
+	public static String format(String text) {
+		return text.toUpperCase().replaceAll("[^\\p{L}]", "");
+	}
+
+	public static ArrayList<Integer> calculateFactors(int num) {
+		ArrayList<Integer> factors = new ArrayList<Integer>();
+		int n = num;
+		for (int i = 1; i <= (int) Math.sqrt(n); i++) {
+			if (n % i == 0) {
+				factors.add(i);
+			}
+		}
+		int size = factors.size();
+		for (int i = size - 1; i >= 0; i--) {
+			factors.add(num / factors.get(i));
+		}
+
+		return factors;
+	}
+
+	public static int kasiski(String text, int minKeyLength, int maxKeyLength) {
+		HashMap<String, Substring> substringMap = new HashMap<String, Substring>();
+		text = format(text);
+		String sub;
+
+		// Fill HashMap with all substrings
+		for (int i = 0; i < text.length() - 2; i++) {
+			sub = text.substring(i, i + 3);
+			if (substringMap.containsKey(sub)) {
+				substringMap.get(sub).addOccurance(i);
+			} else {
+				substringMap.put(sub, new Substring(sub, i));
+			}
+		}
+
+		// Convert HashMap to ArrayList for working with the values
+		ArrayList<Substring> substrings = new ArrayList<Substring>(substringMap.values());
+
+		// Remove all substrings with only single occurrence
+		substrings = Substring.removeSingleOccurrenceSubstrings(substrings);
+
+		/*
+		 * Find the differences between positions of multiple occurrences ofthe
+		 * same substring and calculate the factors of each
+		 */
+		HashMap<Integer, Integer> factorOccurances = new HashMap<Integer, Integer>();
+		for (Substring substr : substrings) {
+			ArrayList<Integer> differences = substr.getDifferences(true);
+			for (Integer diff : differences) {
+				ArrayList<Integer> factors = calculateFactors(diff);
+				for (Integer fact : factors) {
+					if (factorOccurances.containsKey(fact)) {
+						Integer temp = factorOccurances.get(fact);
+						factorOccurances.put(fact, ++temp);
+					} else {
+						factorOccurances.put(fact, 1);
+					}
+				}
+			}
+		}
+
+		// Analzye the frequency of all of the factors
+		return estimateKeyLength(factorOccurances, minKeyLength, maxKeyLength);
+	}
+
+	public static int estimateKeyLength(HashMap<Integer, Integer> occurances, int minKeyLength, int maxKeyLength) {
+		Set<Integer> keys = occurances.keySet();
+		Integer maxKey = 0;
+		Integer maxFreq = 0;
+		for (Integer key : keys) {
+			if (key < minKeyLength)
+				continue;
+			if (key > maxKeyLength)
+				continue;
+			Integer freq = occurances.get(key);
+			if (freq >= maxFreq && key >= minKeyLength && key <= maxKeyLength) {
+				maxFreq = freq;
+				maxKey = key;
+			}
+		}
+		if (maxKey < minKeyLength) {
+			return minKeyLength;
+		} else if (maxKey > maxKeyLength) {
+			return maxKeyLength;
+		} else {
+			return maxKey;
+		}
+	}
+
+	/*************************************************/
 
 	private static int findProbableKeyLength() {
 		File file = new File("6hex.txt");
@@ -118,29 +263,35 @@ public class BreakRepeatingKeyXOR {
 		for (int l = 2; l <= 40; ++l) {
 			try {
 				fileInputStream = new FileInputStream(file);
-				byte fileContent[] = new byte[l];
-				fileInputStream.read(fileContent);
-				String s1 = new String(fileContent);
 
-				fileContent = new byte[l];
-				fileInputStream.read(fileContent);
-				String s2 = new String(fileContent);
-				double val = (double) computeHammingDistance(s1, s2) / (double) l;
-				// DecimalFormat df = new DecimalFormat("#.0000");
+				byte[] firstKeySizeWorthBytes = new byte[l * 2];
+				fileInputStream.read(firstKeySizeWorthBytes);
+				String s = new String(firstKeySizeWorthBytes);
+				firstKeySizeWorthBytes = null;
+				firstKeySizeWorthBytes = hexStringToByteArray(s);
+
+				byte[] secondKeySizeWorthBytes = new byte[l * 2];
+				fileInputStream.read(secondKeySizeWorthBytes);
+				s = new String(secondKeySizeWorthBytes);
+				secondKeySizeWorthBytes = null;
+				secondKeySizeWorthBytes = hexStringToByteArray(s);
+
+				double val = (double) computeHammingDistance(firstKeySizeWorthBytes, secondKeySizeWorthBytes)
+						/ (double) l;
 				if (min == 0.0)
 					min = val;
 				if (val < min) {
 					min = val;
 					len = l;
 				}
-				// System.out.println(l + " " + s1 + " " + s2 + " " +
-				// computeHammingDistance(s1, s2) + " " + df.format(val));
 			} catch (Exception e) {
 				System.out.println("Exception " + e.toString());
 			}
 			try {
-				if (fileInputStream != null)
+				if (fileInputStream != null) {
 					fileInputStream.close();
+					fileInputStream = null;
+				}
 			} catch (Exception e) {
 				System.out.println("Exception " + e.toString());
 			}
@@ -148,9 +299,20 @@ public class BreakRepeatingKeyXOR {
 		return len;
 	}
 
+	public static byte[] hexStringToByteArray(String s) {
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+		}
+		return data;
+	}
+
 	/**
+	 * FIO00-J. Do not operate on files in shared directories
 	 * 
-	 * @return
+	 * @reference https://www.securecoding.cert.org/confluence/display/java/
+	 *            FIO00-J.+Do+not+operate+on+files+in+shared+directories
 	 */
 	private static void convertBase64FileToHex() {
 		String inFilename = "6.txt";
@@ -161,7 +323,8 @@ public class BreakRepeatingKeyXOR {
 
 		try {
 			outFile.createNewFile();
-
+			
+			/*
 			if (!isInSecureDir(inPath)) {
 				System.out.println("File not in secure directory");
 				return;
@@ -178,6 +341,8 @@ public class BreakRepeatingKeyXOR {
 				System.out.println("Not a regular file");
 				return;
 			}
+			*/
+			
 			try {
 				FileReader fr = new FileReader(inFilename);
 				BufferedReader br = new BufferedReader(fr);
@@ -234,24 +399,36 @@ public class BreakRepeatingKeyXOR {
 	/**
 	 * This function computes the Hamming distance between 2 strings.
 	 */
-	public static int computeHammingDistance(String s1, String s2) {
-		String hexS1 = asciiToHex(s1);
-		String hexS2 = asciiToHex(s2);
-		String binaryResult = computeXOR(hexS1, hexS2);
-		return findOnesInBinaryString(binaryResult);
+	public static int computeHammingDistance(byte[] s1, byte[] s2) {
+		/*
+		 * String hexS1 = asciiToHex(s1); String hexS2 = asciiToHex(s2);
+		 */
+		byte[] binaryResult = computeXOR(s1, s2);
+		return findNumberOfOnes(binaryResult);
 	}
 
 	/**
 	 * This function computes the number of 1s in a binary string.
 	 */
-	public static int findOnesInBinaryString(String s) {
-		char[] string = s.toCharArray();
+	public static int findNumberOfOnes(byte[] bytes) {
+
+		String s = "";
+		for (byte b : bytes) {
+			int t = b;
+			s = s + Integer.toBinaryString(t);
+		}
+
 		int count = 0;
-		for (char c : string) {
+		char[] bits = s.toCharArray();
+		for (char c : bits) {
 			if (c == '1')
 				count++;
 		}
 		return count;
+		/*
+		 * int count = 0; for (byte b : bytes) { for (count = 0; b > 0; ++count)
+		 * { b &= b - 1; } } return count;
+		 */
 	}
 
 	/**
@@ -269,6 +446,14 @@ public class BreakRepeatingKeyXOR {
 	 * This function computes character by character XOR for the two input HEX
 	 * strings returns an output string in HEX.
 	 */
+	static byte[] computeXOR(byte[] first, byte[] second) {
+		byte[] resultBytes = new byte[first.length];
+		for (int i = 0; i < first.length; ++i) {
+			resultBytes[i] = (byte) (first[i] ^ second[i]);
+		}
+		return resultBytes;
+	}
+
 	static String computeXOR(String first, String second) {
 		String result = "";
 		StringBuilder stringBuilder = new StringBuilder(result);
@@ -278,8 +463,8 @@ public class BreakRepeatingKeyXOR {
 			int cc = Integer.parseInt(String.valueOf(first.charAt(i)), 16)
 					^ Integer.parseInt(String.valueOf(second.charAt(i)), 16);
 			stringBuilder.append(String.valueOf(Integer.toHexString(cc)));
+			result = stringBuilder.toString();
 		}
-		result = stringBuilder.toString();
 		return result;
 	}
 
@@ -289,7 +474,7 @@ public class BreakRepeatingKeyXOR {
 	 */
 	static String formRepeatingCharacterString(int i, int num) {
 		String key = "";
-		for (int j = 0; j < num / 2; ++j) {
+		for (int j = 0; j < (num / 2) + 10; ++j) {
 			key = key + Integer.toHexString(i);
 		}
 		return key;
@@ -309,8 +494,11 @@ public class BreakRepeatingKeyXOR {
 	static String computeHexToASCII(String hexPlainText) {
 		StringBuilder output = new StringBuilder();
 		for (int k = 0; k < hexPlainText.length(); k += 2) {
-			String str = hexPlainText.substring(k, k + 2);
-			output.append((char) Integer.parseInt(str, 16));
+			try {
+				String str = hexPlainText.substring(k, k + 2);
+				output.append((char) Integer.parseInt(str, 16));
+			} catch (Exception e) {
+			}
 		}
 		return output.toString();
 	}
