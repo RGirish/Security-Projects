@@ -1,5 +1,6 @@
 package girish.security.project;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
@@ -8,10 +9,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class AESCTRRandomAccessAttack {
 
-	private final static String KEY = "yellow submarine";
-	private final static String NONCE = "enirambus wollea";
+	private final static String KEY = generateRandomAESKey();
+	private final static String NONCE = generateRandomAESKey();
 
 	public static void main(String[] args) {
+		
 		String asciiPlainText = "yellow submarineyellow submarineyellow submarineyellow submarineyellow submarine";
 		System.out.println("Original Plain Text (Unknown to attacker) - " + asciiPlainText);
 		byte[] ctBytes = encryptAESCTR(NONCE, asciiPlainText, KEY);
@@ -109,6 +111,16 @@ public class AESCTRRandomAccessAttack {
 			}
 		}
 		return ctBytes;
+	}
+	
+	public static String generateRandomAESKey() {
+		String keyCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		SecureRandom rand = new SecureRandom();
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < 16; ++i) {
+			builder.append(keyCharacters.charAt(rand.nextInt(keyCharacters.length())));
+		}
+		return builder.toString();
 	}
 
 }
