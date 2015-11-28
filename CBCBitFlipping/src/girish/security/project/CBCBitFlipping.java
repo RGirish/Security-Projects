@@ -11,8 +11,8 @@ import javax.xml.bind.DatatypeConverter;
 public class CBCBitFlipping {
 
 	public static void main(String[] args) {
-		String asciiKey = "yellow submarine";
-		byte[] iv = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		String asciiKey = generateRandomAESKey();
+		byte[] iv = generateRandomAESKey().getBytes();
 
 		String processedString = prependAndAppend("_-_;admin=true");
 		byte[] cipherByes = padAndEncryptTheString(processedString, asciiToHex(asciiKey), iv);
