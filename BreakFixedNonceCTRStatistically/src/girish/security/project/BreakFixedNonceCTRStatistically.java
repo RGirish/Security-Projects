@@ -3,6 +3,7 @@ package girish.security.project;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,36 +34,31 @@ public class BreakFixedNonceCTRStatistically {
 			e.printStackTrace();
 		}
 
-		int minLength = strings[0].length();
+		byte[][] ciphers = new byte[60][];
 		for (i = 0; i < 60; ++i) {
-			if (strings[i].length() < minLength) {
-				minLength = strings[i].length();
+			String s = strings[i];
+			String asciiPlainText = computeHexToASCII(s);
+			String asciiNonce = "enirambus wolley";
+			String asciiKey = "yellow submarine";
+			ciphers[i] = encryptAESCTR(asciiNonce, asciiPlainText, asciiKey);
+		}
+
+		int minLength = ciphers[0].length;
+		for (i = 0; i < 60; ++i) {
+			if (ciphers[i].length < minLength) {
+				minLength = ciphers[i].length;
 			}
 		}
 		
 		for (i = 0; i < 60; ++i) {
-			strings[i] = strings[i].substring(0, minLength-1);
+			ciphers[i] = Arrays.copyOf(ciphers[i], minLength);
 		}
-		List<String> blocks = new ArrayList<>();		
-		byte[][] ciphers = new byte[60][];
-		for (i = 0; i < 60; ++i) {
-			String s = strings[i];
-			String asciiPlainText = hexToAscii(base64ToHex(s));
-			String asciiNonce = "enirambus wolley";
-			String asciiKey = "yellow submarine";
-			ciphers[i] = encryptAESCTR(asciiNonce, asciiPlainText, asciiKey);
-			String st = new String(ciphers[i]);
-			blocks.add(st);
-			//System.out.println("\n" + new String(decryptAESCTR(asciiNonce, ciphers[i], asciiKey)));
-		}
-		
 		List<String> afterFindingKey = new ArrayList<>();
-		List<String> transposedBlocks = transposeBlocks(blocks);
-		for (String s : transposedBlocks) {
-			String st = computeSingleByteXOR(s);
+		byte[][] transposedBlocks = transposeBlocks(ciphers);
+		for (i = 0; i < transposedBlocks.length; ++i) {
+			String st = computeSingleByteXOR(transposedBlocks[i]);
 			afterFindingKey.add(st);
 		}
-		System.out.println("\n\n*************\n\n");
 
 		int index = 0;
 		while (true) {
@@ -76,29 +72,24 @@ public class BreakFixedNonceCTRStatistically {
 			index++;
 		}
 	}
-	
-	private static List<String> transposeBlocks(List<String> blocks) {
-		List<String> transposedBlocks = new ArrayList<String>();
-		for (int i = 0; i < blocks.get(0).length(); i = i + 2) {
-			StringBuilder builder = new StringBuilder();
-			for (String s : blocks) {
-				try {
-					builder.append(s.substring(i, i + 2));
-				} catch (Exception e) {
-				}
+
+	private static byte[][] transposeBlocks(byte[][] blocks) {
+		byte[][] transposedBlocks = new byte[blocks[0].length][60];
+		for (int i = 0; i < blocks[0].length; i++) {
+			for (int j = 0; j < blocks.length; ++j) {
+				transposedBlocks[i][j] = blocks[j][i];
 			}
-			transposedBlocks.add(builder.toString());
 		}
 		return transposedBlocks;
 	}
-	
-	public static String computeSingleByteXOR(String hexCipherText) {
+
+	public static String computeSingleByteXOR(byte[] byteCipherText) {
 		Map<String, Double> finalScores = new LinkedHashMap<String, Double>();
 
-		for (int i = 0x20; i <= 0xff; ++i) {
-			String key = formRepeatingCharacterString(i, hexCipherText.length());
-			String hexPlainText = computeXOR(hexCipherText, key);
-			String output = computeHexToASCII(hexPlainText);
+		for (int i = 0x20; i <= 0x7e; ++i) {
+			String key = formRepeatingCharacterString(i, byteCipherText.length);
+			byte[] bytePlainText = computeXOR(byteCipherText, key.getBytes());
+			String output = computeHexToASCII(new String(bytePlainText));
 			finalScores.put(String.valueOf((char) i), computeScore(output));
 		}
 
@@ -112,14 +103,15 @@ public class BreakFixedNonceCTRStatistically {
 			maxScore = (maxScore > (double) pair.getValue() ? maxScore : (double) pair.getValue());
 			keyCharacter = (maxScore > (double) pair.getValue() ? keyCharacter : (String) pair.getKey());
 		}
-		System.out.print(keyCharacter);
-		String key = formRepeatingCharacterString(keyCharacter, hexCipherText.length());
-		String hexPlainText = computeXOR(hexCipherText, key);
-		String originalPlainText = computeHexToASCII(hexPlainText);
+		//System.out.println(maxScore + " " + keyCharacter);
+		//System.out.print(keyCharacter);
+		String key = formRepeatingCharacterString(keyCharacter, byteCipherText.length);
+		byte[] bytePlainText = computeXOR(byteCipherText, key.getBytes());
+		String originalPlainText = computeHexToASCII(new String(bytePlainText));
 		it.remove();
 		return originalPlainText;
 	}
-	
+
 	static String formRepeatingCharacterString(String keyCharacter, int num) {
 		String key = "";
 		for (int j = 0; j < num; ++j) {
@@ -127,15 +119,23 @@ public class BreakFixedNonceCTRStatistically {
 		}
 		return key;
 	}
-	
+
 	static String formRepeatingCharacterString(int i, int num) {
 		String key = "";
-		for (int j = 0; j < (num / 2) + 10; ++j) {
+		for (int j = 0; j < num/2; ++j) {
 			key = key + Integer.toHexString(i);
 		}
 		return key;
 	}
-	
+
+	static byte[] computeXOR(byte[] first, byte[] second) {
+		byte[] resultBytes = new byte[first.length];
+		for (int i = 0; i < first.length; ++i) {
+			resultBytes[i] = (byte) (first[i] ^ second[i]);
+		}
+		return resultBytes;
+	}
+
 	static String computeXOR(String first, String second) {
 		String result = "";
 		StringBuilder stringBuilder = new StringBuilder(result);
@@ -149,7 +149,7 @@ public class BreakFixedNonceCTRStatistically {
 		}
 		return result;
 	}
-	
+
 	static String computeHexToASCII(String hexPlainText) {
 		StringBuilder output = new StringBuilder();
 		for (int k = 0; k < hexPlainText.length(); k += 2) {
@@ -214,7 +214,7 @@ public class BreakFixedNonceCTRStatistically {
 		}
 		return buffer.toString();
 	}
-	
+
 	private static String base64ToHex(String base64) {
 		String hex = "";
 		for (int i = 0; i < base64.length(); ++i) {
@@ -242,7 +242,7 @@ public class BreakFixedNonceCTRStatistically {
 		stringBuilder.append(String.valueOf(hexLookUp.charAt(Integer.parseInt(bits, 2))));
 		return stringBuilder.toString();
 	}
-	
+
 	public static byte[] encryptAESCTR(String nonce, String plainText, String key) {
 		byte[] ptBytes = plainText.getBytes();
 		byte[] nonceBytes = nonce.getBytes();
