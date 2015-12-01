@@ -1,5 +1,6 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -121,6 +122,22 @@ public class AESCTRRandomAccessAttack {
 			builder.append(keyCharacters.charAt(rand.nextInt(keyCharacters.length())));
 		}
 		return builder.toString();
+	}
+	
+	/*
+	 * Cloning is disabled for security reasons.
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

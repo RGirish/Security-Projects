@@ -1,5 +1,7 @@
 package Cbc;
 
+import java.io.ObjectOutputStream;
+
 public class CBC {
 	static String c = "";
 	static int j=0;
@@ -47,4 +49,19 @@ public class CBC {
 		System.out.println(ct);
 	}
 
+	/*
+	 * Cloning is disabled for security reasons.
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
+	}
 }

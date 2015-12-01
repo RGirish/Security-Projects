@@ -7,12 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.UserPrincipal;
@@ -308,12 +307,6 @@ public class BreakRepeatingKeyXOR {
 		return data;
 	}
 
-	/**
-	 * FIO00-J. Do not operate on files in shared directories
-	 * 
-	 * @reference https://www.securecoding.cert.org/confluence/display/java/
-	 *            FIO00-J.+Do+not+operate+on+files+in+shared+directories
-	 */
 	private static void convertBase64FileToHex() {
 		String inFilename = "6.txt";
 		Path inPath = new File(inFilename).toPath();
@@ -323,26 +316,30 @@ public class BreakRepeatingKeyXOR {
 
 		try {
 			outFile.createNewFile();
-			
+
 			/*
-			if (!isInSecureDir(inPath)) {
-				System.out.println("File not in secure directory");
-				return;
-			}
+			 * FIO00-J. Do not operate on files in shared directories
+			 * 
+			 * @reference
+			 * https://www.securecoding.cert.org/confluence/display/java/
+			 * FIO00-J.+Do+not+operate+on+files+in+shared+directories
+			 */
 
-			BasicFileAttributes inAttr = Files.readAttributes(inPath, BasicFileAttributes.class,
-					LinkOption.NOFOLLOW_LINKS);
-			BasicFileAttributes outAttr = Files.readAttributes(outPath, BasicFileAttributes.class,
-					LinkOption.NOFOLLOW_LINKS);
+			/*
+			 * if (!isInSecureDir(inPath)) { System.out.println(
+			 * "File not in secure directory"); return; }
+			 * 
+			 * BasicFileAttributes inAttr = Files.readAttributes(inPath,
+			 * BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			 * BasicFileAttributes outAttr = Files.readAttributes(outPath,
+			 * BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+			 * 
+			 * // Check if the file is a regular file and not a FIFO file or a
+			 * // device file. if (!inAttr.isRegularFile() ||
+			 * !outAttr.isRegularFile()) { System.out.println(
+			 * "Not a regular file"); return; }
+			 */
 
-			// Check if the file is a regular file and not a FIFO file or a
-			// device file.
-			if (!inAttr.isRegularFile() || !outAttr.isRegularFile()) {
-				System.out.println("Not a regular file");
-				return;
-			}
-			*/
-			
 			try {
 				FileReader fr = new FileReader(inFilename);
 				BufferedReader br = new BufferedReader(fr);
@@ -684,6 +681,22 @@ public class BreakRepeatingKeyXOR {
 		}
 
 		return true;
+	}
+	
+	/*
+	 * Cloning is disabled for security reasons.
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

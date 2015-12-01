@@ -1,5 +1,7 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -39,23 +41,23 @@ public class BreakFixedNonceCTR {
 			String asciiNonce = "enirambus wolley";
 			String asciiKey = "yellow submarine";
 			ciphers[i] = encryptAESCTR(asciiNonce, asciiPlainText, asciiKey);
-			
+
 			System.out.println(new String(decryptAESCTR(asciiNonce, ciphers[i], asciiKey)));
 		}
 
 		int[] bytefrequencies = new int[256];
 
 		for (byte[] cipher : ciphers) {
-			for (int i=0;i<16;++i) {
-				bytefrequencies[(int)(cipher[i]) + 128] = bytefrequencies[(int)(cipher[i]) + 128] + 1;
+			for (int i = 0; i < 16; ++i) {
+				bytefrequencies[(int) (cipher[i]) + 128] = bytefrequencies[(int) (cipher[i]) + 128] + 1;
 				System.out.print(cipher[i] + " ");
 			}
 			System.out.println("\n");
 		}
-		
+
 		System.out.println("************\n\n");
 		for (int i = 0; i < 256; ++i) {
-			System.out.println(i-128 + " " + bytefrequencies[i]);
+			System.out.println(i - 128 + " " + bytefrequencies[i]);
 		}
 
 	}
@@ -160,6 +162,22 @@ public class BreakFixedNonceCTR {
 			}
 		}
 		return ctBytes;
+	}
+
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

@@ -1,8 +1,14 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -13,7 +19,7 @@ public class ECBCutAndPaste {
 		String pkcsPaddedHexPlainText = PKCSPadTheHexString(asciiToHex(userProfileFor("girish.raman@asu.edu")), 16);
 		String KEY = generateRandomAESKey();
 		byte[] ctBytes = encryptAESECB(pkcsPaddedHexPlainText, asciiToHex(KEY));
-		
+
 		pkcsPaddedHexPlainText = PKCSPadTheHexString(asciiToHex(adminProfileFor("girish.raman@asu.edu")), 16);
 		byte[] ctBytesAdmin = encryptAESECB(pkcsPaddedHexPlainText, asciiToHex(KEY));
 		for (int i = 32; i < 48; ++i) {
@@ -113,12 +119,19 @@ public class ECBCutAndPaste {
 			result = cipher.doFinal(DatatypeConverter.parseHexBinary(hexPlainText));
 		}
 		/*
+		 * ERR01-J. Do not allow exceptions to expose sensitive information
+		 * 
+		 * @reference
+		 * https://www.securecoding.cert.org/confluence/display/java/ERR01-J.+Do
+		 * +not+allow+exceptions+to+expose+sensitive+information
+		 * 
 		 * Instead of giving out specifics about the exact Exception that has
 		 * occurred, we're giving out a general error message so that this does
 		 * not help the adversary gain any advantage.
 		 */
-		catch (Exception e) {
-			System.out.println("Exception!");
+		catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
+				| BadPaddingException e) {
+			System.out.println("An error occured! Please try again.");
 		}
 		return result;
 	}
@@ -184,5 +197,21 @@ public class ECBCutAndPaste {
 			}
 		}
 		return builder.toString();
+	}
+
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 }
