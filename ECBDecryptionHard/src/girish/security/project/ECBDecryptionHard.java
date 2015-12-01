@@ -36,7 +36,7 @@ public class ECBDecryptionHard {
 				break;
 			}
 		}
-		System.out.println(prefix);
+		System.out.println("The prefix has been found as - " + prefix);
 		System.out.println((org - 1) * 16 + numberOfUnknownCharsInThisBlock);
 
 		StringBuilder builder = new StringBuilder();
@@ -58,8 +58,6 @@ public class ECBDecryptionHard {
 				}
 			}
 		}
-
-		System.out.println(builder.toString());
 
 	}
 
