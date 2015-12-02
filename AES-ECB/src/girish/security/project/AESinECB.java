@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -17,8 +18,8 @@ public class AESinECB {
 			base64LookUp = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	public static void main(String[] args) {
-		//convertBase64FileToHex();
-		//System.out.println(decryptAES());
+		// convertBase64FileToHex();
+		// System.out.println(decryptAES());
 		System.out.println(hexToAscii("436f6d696e67207769746820766976696420666163657300"));
 	}
 
@@ -160,10 +161,6 @@ public class AESinECB {
 	 * This function decrypts the AES encoded content in the file 7hex.txt with
 	 * the specified key.
 	 * 
-	 * @reference http://stackoverflow.com/questions/13102788/is-there-any-
-	 *            sample-java-code-that-does-aes-encryption-exactly-like-this-
-	 *            website
-	 * 
 	 * @return Original Plaintext in ASCII.
 	 */
 
@@ -190,4 +187,19 @@ public class AESinECB {
 		}
 	}
 
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
+	}
 }

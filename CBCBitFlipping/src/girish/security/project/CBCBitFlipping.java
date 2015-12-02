@@ -1,5 +1,6 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -15,6 +16,18 @@ public class CBCBitFlipping {
 		byte[] iv = generateRandomAESKey().getBytes();
 
 		String processedString = prependAndAppend("_-_;admin=true");
+
+		/*
+		 * STR03-J. Do not encode noncharacter data as a string
+		 * 
+		 * @reference
+		 * https://www.securecoding.cert.org/confluence/display/java/STR03-J.+Do
+		 * +not+encode+noncharacter+data+as+a+string
+		 * 
+		 * The ciphertext formed after encryption will not contain ASCII
+		 * printable characters. So we need to operate on raw bytes rather than
+		 * convert into a String object.
+		 */
 		byte[] cipherByes = padAndEncryptTheString(processedString, asciiToHex(asciiKey), iv);
 
 		byte[] secondCipherBlock = new byte[16];
@@ -121,6 +134,13 @@ public class CBCBitFlipping {
 	}
 
 	private static String PKCSPadTheHexString(String hexString, int blockSize) {
+		/*
+		 * Always use StringBuilder or StringBuffer for String concatenation.
+		 * 
+		 * Concatenating String objects using the + operator will occupy twice
+		 * the required memory. Instead, we need to make use of the append()
+		 * function in the class StringBuilder or StringBuffer.
+		 */
 		StringBuilder s = new StringBuilder(hexString);
 		if (s.length() % 32 != 0) {
 			int diff = (((blockSize * 2) - (s.length() % 32)) / 2);
@@ -140,6 +160,22 @@ public class CBCBitFlipping {
 			builder.append(keyCharacters.charAt(rand.nextInt(keyCharacters.length())));
 		}
 		return builder.toString();
+	}
+
+	/*
+	 * Cloning is disabled for security reasons.
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

@@ -1,6 +1,8 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
@@ -30,7 +32,7 @@ public class CBCKEYisIV {
 			System.out.println("Hey alice, Bob here. What is this that you sent - " + message);
 			byte[] extractedKeyBytes = new byte[16];
 			for (int i = 0; i < 16; ++i) {
-				extractedKeyBytes[i] = (byte) (messageBytes[i] ^ messageBytes[i+32]);
+				extractedKeyBytes[i] = (byte) (messageBytes[i] ^ messageBytes[i + 32]);
 			}
 			System.out.println("Attacker: Found the key - " + new String(extractedKeyBytes));
 		}
@@ -82,15 +84,6 @@ public class CBCKEYisIV {
 		return result;
 	}
 
-	private static String prependAndAppend(String s) {
-		s = s.replaceAll(";", "SC");
-		s = s.replaceAll("=", "EQ");
-		String finalString = "comment1=cooking%20MCs;userdata=";
-		finalString = finalString + s;
-		finalString = finalString + ";comment2=%20like%20a%20pound%20of%20bacon";
-		return finalString;
-	}
-
 	public static String asciiToHex(String ascii) {
 		StringBuffer buffer = new StringBuffer();
 		for (int i = 0; i < ascii.length(); ++i) {
@@ -119,6 +112,22 @@ public class CBCKEYisIV {
 			builder.append(keyCharacters.charAt(rand.nextInt(keyCharacters.length())));
 		}
 		return builder.toString();
+	}
+
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

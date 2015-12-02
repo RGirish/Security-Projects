@@ -1,5 +1,6 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -36,7 +37,7 @@ public class ECBDecryptionHard {
 				break;
 			}
 		}
-		System.out.println(prefix);
+		System.out.println("The prefix has been found as - " + prefix);
 		System.out.println((org - 1) * 16 + numberOfUnknownCharsInThisBlock);
 
 		StringBuilder builder = new StringBuilder();
@@ -58,8 +59,6 @@ public class ECBDecryptionHard {
 				}
 			}
 		}
-
-		System.out.println(builder.toString());
 
 	}
 
@@ -270,4 +269,19 @@ public class ECBDecryptionHard {
 		return left / right;
 	}
 
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
+	}
 }

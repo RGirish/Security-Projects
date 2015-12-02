@@ -1,5 +1,7 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
+
 public class Base64ToHex {
 
 	// At the end of the program, 'hex' will contain the output.
@@ -44,5 +46,21 @@ public class Base64ToHex {
 		StringBuilder stringBuilder = new StringBuilder(hex);
 		stringBuilder.append(String.valueOf(hexLookUp.charAt(Integer.parseInt(bits, 2))));
 		hex = stringBuilder.toString();
+	}
+
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 }

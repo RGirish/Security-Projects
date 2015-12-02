@@ -1,5 +1,6 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -63,7 +64,14 @@ public class ECBCBCDetection {
 					s.append(Integer.toHexString((diff)));
 				}
 			} catch (ArithmeticException e) {
-				System.out.println("ArithmeticException thrown by safeArithmetic function - " + e.getMessage());
+				/*
+				 * ERR00-J. Do not suppress or ignore checked exceptions
+				 * 
+				 * @reference
+				 * https://www.securecoding.cert.org/confluence/display/java/
+				 * ERR00-J.+Do+not+suppress+or+ignore+checked+exceptions
+				 */
+				System.out.println("An Exception occurred.");
 				return null;
 			}
 		}
@@ -72,6 +80,7 @@ public class ECBCBCDetection {
 
 	/**
 	 * This function randomly generates a 16 Byte key to be used with AES
+	 * 
 	 * @return The randomly generated key
 	 */
 	public static String generateRandomAESKey() {
@@ -179,7 +188,17 @@ public class ECBCBCDetection {
 			cipher = Cipher.getInstance("AES/ECB/NoPadding");
 			cipher.init(Cipher.ENCRYPT_MODE, key);
 			result = cipher.doFinal(DatatypeConverter.parseHexBinary(hexPlainText));
-		} catch (NoSuchAlgorithmException e) {
+		}
+		/*
+		 * ERR08-J. Do not catch NullPointerException or any of its ancestors
+		 * 
+		 * @reference
+		 * https://www.securecoding.cert.org/confluence/display/java/ERR08-J.+Do
+		 * +not+catch+NullPointerException+or+any+of+its+ancestors
+		 * 
+		 * Do not catch Exception. Catch the individual exception types.
+		 */
+		catch (NoSuchAlgorithmException e) {
 			System.out.println("NoSuchAlgorithmException " + e.getMessage());
 			return null;
 		} catch (NoSuchPaddingException e) {
@@ -280,4 +299,19 @@ public class ECBCBCDetection {
 		return left / right;
 	}
 
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
+	}
 }

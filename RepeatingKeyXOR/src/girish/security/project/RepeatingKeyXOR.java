@@ -1,5 +1,7 @@
 package girish.security.project;
 
+import java.io.ObjectOutputStream;
+
 public class RepeatingKeyXOR {
 
 	public static void main(String[] args) {
@@ -50,6 +52,22 @@ public class RepeatingKeyXOR {
 			buffer.append(Integer.toHexString((int) ascii.charAt(i)));
 		}
 		return buffer.toString();
+	}
+
+	/*
+	 * Cloning is disabled for security reasons. (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }

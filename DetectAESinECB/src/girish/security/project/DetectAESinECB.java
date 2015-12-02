@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class DetectAESinECB {
@@ -70,14 +71,28 @@ public class DetectAESinECB {
 					System.out.println("File cannot be read by the applicaiton!");
 				}
 
-			} else
-
-			{
+			} else{
 				System.out.println("The given name is that of a Directory, and not a file.");
 			}
 		} else {
 			System.out.println("The file does not exist.");
 		}
+	}
+	
+	/*
+	 * Cloning is disabled for security reasons.
+	 * (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	public final Object clone() throws java.lang.CloneNotSupportedException {
+		throw new java.lang.CloneNotSupportedException();
+	}
+
+	/*
+	 * Object Serialization is disabled for security reasons.
+	 */
+	private final void writeObject(ObjectOutputStream out) throws java.io.IOException {
+		throw new java.io.IOException("Object cannot be serialized");
 	}
 
 }
