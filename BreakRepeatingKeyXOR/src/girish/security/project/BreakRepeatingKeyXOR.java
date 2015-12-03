@@ -33,7 +33,7 @@ public class BreakRepeatingKeyXOR {
 	public static void main(String[] args) {
 
 		convertBase64FileToHex();
-		// int probableKeyLength = findProbableKeyLength();
+		//int probableKeyLength = findProbableKeyLength();
 
 		double probableKeyLength = kasiski(readFileByLine("6hex.txt"), 5, 41);
 		System.out.println("Probable Key Length - " + probableKeyLength);

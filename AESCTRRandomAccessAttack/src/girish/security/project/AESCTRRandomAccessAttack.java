@@ -15,7 +15,8 @@ public class AESCTRRandomAccessAttack {
 
 	public static void main(String[] args) {
 		
-		String asciiPlainText = "yellow submarineyellow submarineyellow submarineyellow submarineyellow submarine";
+		String asciiPlainText = "abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefgh";
+		
 		System.out.println("Original Plain Text (Unknown to attacker) - " + asciiPlainText);
 		byte[] ctBytes = encryptAESCTR(NONCE, asciiPlainText, KEY);
 		byte[] ctBytesCopy = Arrays.copyOf(ctBytes, ctBytes.length);

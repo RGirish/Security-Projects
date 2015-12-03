@@ -16,6 +16,7 @@ public class CBCBitFlipping {
 		byte[] iv = generateRandomAESKey().getBytes();
 
 		String processedString = prependAndAppend("_-_;admin=true");
+		System.out.println(processedString);
 
 		/*
 		 * STR03-J. Do not encode noncharacter data as a string

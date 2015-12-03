@@ -2,7 +2,7 @@ package padding;
 
 public class PKCS {
 	public static void main(String[] args) {
-		StringBuilder s = new StringBuilder("yellow submarine");
+		StringBuilder s = new StringBuilder("yellow submarine12");
 		int blockSize = 16;
 		/*
 		 * @reference https://www.securecoding.cert.org/confluence/display/java/
