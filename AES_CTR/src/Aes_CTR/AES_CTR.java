@@ -33,6 +33,7 @@ public class AES_CTR {
 		byte[] iv = new byte[] {0x00,0x01,0x02,0x03,0x00,0x02,0x01,0x00,0x00,0x00,0x01,0x02,0x00,0x00,0x00,0x00};
 		String pt = "This is shankar" ;
 		byte[] ct = encrypt_aes_ctr(pt,key,iv);
+		//System.out.println("Cipher text : "+new String(ct));
 		byte[] pt1 = decrypt_aes_ctr(ct,key,iv);
 		System.out.println("Original plain text : "+new String(pt1));
 	}
